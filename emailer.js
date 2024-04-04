@@ -15,8 +15,6 @@ const transporter = nodemailer.createTransport({
 });
 
 export default async (req, res) => {
-    // Force an error response for testing
-    return res.status(500).json({ message: "Simulated error for testing." });
+    console.log('fake hh');
   };
-  
   

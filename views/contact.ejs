@@ -118,36 +118,47 @@
 document.addEventListener('DOMContentLoaded', function() {
     const contactForm = document.getElementById("contactForm");
     const contactFormSentModal = new bootstrap.Modal(document.getElementById("contactFormSent"));
-    const errorModal = new bootstrap.Modal(document.getElementById("errorModal")); // Reference the error modal
+    const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
     const spinnerBackground = document.querySelector('.spinner-background');
 
     contactForm.addEventListener("submit", function(event) {
-        event.preventDefault(); // prevent the default form submission behavior
+        event.preventDefault(); // Prevent the default form submission behavior
 
         spinnerBackground.style.display = 'block';
         console.log("Form submitted!");
 
+        let didTimeout = false; // Flag to check if timeout occurred
+
+        const timeout = setTimeout(() => {
+            didTimeout = true;
+            spinnerBackground.style.display = 'none'; // Hide spinner due to timeout
+            showErrorModal("Le serveur n'a pas répondu à temps. Veuillez réessayer plus tard."); // Show error modal after timeout
+        }, 20000); // Set timeout to 20 seconds
+
         const formData = new FormData(contactForm);
         fetch("/contact", {method: "POST", body: formData})
             .then((response) => {
-                spinnerBackground.style.display = 'none'; // Ensure spinner is hidden after getting any response
+                clearTimeout(timeout); // Clear the timeout as the fetch completed
+                if (didTimeout) return; // If it already timed out, do nothing further
+                spinnerBackground.style.display = 'none'; // Ensure spinner is hidden after any response
                 if (response.ok) {
                     console.log("Message sent!");
                     contactForm.reset();
                     contactFormSentModal.show();
                 } else {
                     console.log("Response not OK:", response);
-                    throw new Error("La réponse du réseau n'était pas correcte. Veuillez réessayer plus tard."); // Updated error message
+                    throw new Error("La réponse du réseau n'était pas correcte. Veuillez réessayer plus tard."); // Updated error message for non-OK responses
                 }
             })
             .catch((error) => {
+                if (didTimeout) return; // If it already timed out, do nothing further
                 console.error(error);
-                showErrorModal("Une erreur s'est produite lors de l'envoi du message. Veuillez réessayer plus tard."); // Show error modal with updated message in French
+                showErrorModal("Une erreur s'est produite lors de l'envoi du message. Veuillez réessayer plus tard."); // Show error modal with message in French
             });
     });
 
     function showErrorModal(errorMessage) {
-        // Ensure any currently displayed modal is hidden
+        // Hide any currently displayed modal
         contactFormSentModal.hide();
 
         // Set the error message in French
@@ -159,5 +170,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log("Script loaded.");
 });
+
 
 </script> 
