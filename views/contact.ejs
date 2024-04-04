@@ -1,0 +1,163 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+<style>.spinner-background {
+	position: fixed;
+	display: none;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent grey */
+	z-index: 9500; /* Higher than other elements */
+}
+
+.spinner {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	width: 50px;
+	height: 50px;
+	margin-top: -25px;
+	margin-left: -25px;
+	border-radius: 50%;
+	border: .6rem solid #e6e6e6;
+	border-top-color: var(--primary);
+	animation: spinner 1s linear infinite;
+	z-index: 9999; /* Above background */
+}
+</style>
+
+<div class="contact-form">
+    <form class="form-wrap" id="contactForm">
+        <div class="row">
+            <div class="col-md-6 col-sm-6">
+                <div class="form-group">
+                    <input type="text" name="contactFullName" placeholder="Nom complet*" id="contactFullName"
+                        required data-error="Veuillez saisir votre nom complet">
+                    <div class="help-block with-errors"></div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <div class="form-group">
+                    <input type="email" name="contactEmail" id="contactEmail" required
+                        placeholder="Email*" data-error="Veuillez saisir votre email">
+                    <div class="help-block with-errors"></div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <div class="form-group">
+                    <input type="text" name="contactPhone" id="contactPhone" required
+                        placeholder="Téléphone*" data-error="Veuillez saisir votre téléphone">
+                    <div class="help-block with-errors"></div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <div class="form-group">
+                    <input type="text" name="contactMsgSubject" placeholder="Sujet*" id="contactMsgSubject" required data-error="Veuillez saisir votre sujet">
+                    <div class="help-block with-errors"></div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group v1">
+                    <textarea name="contactMessage" id="contactMessage" placeholder="Votre message..." cols="30" rows="10" required data-error="Veuillez saisir votre message"></textarea>
+                    <div class="help-block with-errors"></div>
+                </div>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn style2 w-100 d-block">Envoyer le message</button>
+                <div id="msgSubmit" class="h3 text-center hidden"></div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </form>
+</div> 
+
+
+
+        
+
+
+
+
+<div class="spinner-background">
+    <div class="spinner"></div>
+  </div>
+
+<div class="modal fade text-center" id="contactFormSent" tabindex="-1" aria-labelledby="contactFormSentLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body">
+                <i class="fa-solid fa-envelope-circle-check"></i>
+                <h3> Merci pour votre message.</h3>
+                <p>Nous vous répondrons dans les plus brefs délais.</p>
+                <button type="button" class="btn btn-secondary modal-btn" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Error message will be set here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById("contactForm");
+    const contactFormSentModal = new bootstrap.Modal(document.getElementById("contactFormSent"));
+    const errorModal = new bootstrap.Modal(document.getElementById("errorModal")); // Reference the error modal
+    const spinnerBackground = document.querySelector('.spinner-background');
+
+    contactForm.addEventListener("submit", function(event) {
+        event.preventDefault(); // prevent the default form submission behavior
+
+        spinnerBackground.style.display = 'block';
+        console.log("Form submitted!");
+
+        const formData = new FormData(contactForm);
+        fetch("/contact", {method: "POST", body: formData})
+            .then((response) => {
+                spinnerBackground.style.display = 'none'; // Ensure spinner is hidden after getting any response
+                if (response.ok) {
+                    console.log("Message sent!");
+                    contactForm.reset();
+                    contactFormSentModal.show();
+                } else {
+                    console.log("Response not OK:", response);
+                    throw new Error("La réponse du réseau n'était pas correcte. Veuillez réessayer plus tard."); // Updated error message
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                showErrorModal("Une erreur s'est produite lors de l'envoi du message. Veuillez réessayer plus tard."); // Show error modal with updated message in French
+            });
+    });
+
+    function showErrorModal(errorMessage) {
+        // Ensure any currently displayed modal is hidden
+        contactFormSentModal.hide();
+
+        // Set the error message in French
+        document.getElementById('errorModal').querySelector('.modal-body').textContent = errorMessage;
+
+        // Show the error modal
+        errorModal.show();
+    }
+
+    console.log("Script loaded.");
+});
+
+</script> 
