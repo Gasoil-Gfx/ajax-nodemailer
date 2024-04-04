@@ -24,10 +24,10 @@ export default async (req, res) => {
 
     // Email HTML with inline CSS
     const emailHTML = `
-        <div style="font-family: Arial, sans-serif; color: red;">
-            <h1 style="color: #007bff;">New Message from Contact Form</h1>
+        <div style="font-family: Arial, sans-serif; color: #333;">
+            <h1 style="color: red;">Website Contact Form</h1>
             <p><strong>Name:</strong> ${contactFullName}</p>
-            <p><strong>Email:</strong> <a href="mailto:${contactEmail}" style="color: #007bff;">${contactEmail}</a></p>
+            <p><strong>Email:</strong> <a href="mailto:${contactEmail}">${contactEmail}</a></p>
             <p><strong>Phone:</strong> ${contactPhone}</p>
             <p><strong>Subject:</strong> ${contactMsgSubject}</p>
             <p><strong>Message:</strong></p>
